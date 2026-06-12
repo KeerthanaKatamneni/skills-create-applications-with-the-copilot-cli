@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-// Node.js CLI Calculator
+// Node.js CLI Calculator (uses calculator-core.js)
 // Supported operations:
 //  - add : addition (a + b)
 //  - sub : subtraction (a - b)
 //  - mul : multiplication (a * b)
 //  - div : division (a / b)
 
+const { add, sub, mul, div, evalExpression } = require('./calculator-core');
 const args = process.argv.slice(2);
 
 function printHelp() {
@@ -27,25 +28,16 @@ if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
   process.exit(0);
 }
 
-// If a single argument looks like an expression, evaluate it (only safe chars)
+// If a single argument looks like an expression, evaluate it
 if (args.length === 1) {
   const expr = args[0];
-  if (/^[0-9.\s()+\-*/]+$/.test(expr)) {
-    try {
-      // evaluate expression after basic validation
-      // Note: using Function for a local CLI tool; input is restricted to numbers and operators above
-      const result = Function(`"use strict"; return (${expr})`)();
-      if (typeof result === 'number' && Number.isFinite(result)) {
-        console.log(result);
-        process.exit(0);
-      } else {
-        console.error('Error: Expression did not produce a finite numeric result.');
-        process.exit(2);
-      }
-    } catch (e) {
-      console.error('Error: Failed to evaluate expression:', e.message);
-      process.exit(2);
-    }
+  try {
+    const result = evalExpression(expr);
+    console.log(result);
+    process.exit(0);
+  } catch (e) {
+    console.error('Error:', e.message);
+    process.exit(2);
   }
 }
 
@@ -69,20 +61,21 @@ if (!isFinite(a) || !isFinite(b)) {
 
 switch (cmd) {
   case 'add':
-    console.log(a + b);
+    console.log(add(a, b));
     break;
   case 'sub':
-    console.log(a - b);
+    console.log(sub(a, b));
     break;
   case 'mul':
-    console.log(a * b);
+    console.log(mul(a, b));
     break;
   case 'div':
-    if (b === 0) {
-      console.error('Error: Division by zero');
+    try {
+      console.log(div(a, b));
+    } catch (e) {
+      console.error('Error:', e.message);
       process.exit(2);
     }
-    console.log(a / b);
     break;
   default:
     invalidUsage(`Unknown command: ${cmd}`);
