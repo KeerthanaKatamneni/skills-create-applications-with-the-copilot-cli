@@ -7,7 +7,7 @@
 //  - mul : multiplication (a * b)
 //  - div : division (a / b)
 
-const { add, sub, mul, div, evalExpression } = require('./calculator-core');
+const { add, sub, mul, div, modulo, power, squareRoot, evalExpression } = require('./calculator-core');
 const args = process.argv.slice(2);
 
 function printHelp() {
@@ -51,6 +51,24 @@ function invalidUsage(msg) {
   process.exit(2);
 }
 
+// sqrt is a single-operand command: node src/calculator.js sqrt <a>
+if (cmd === 'sqrt') {
+  if (args.length < 2) {
+    invalidUsage('Not enough arguments for sqrt.');
+  }
+  const n = Number(args[1]);
+  if (!isFinite(n)) {
+    invalidUsage('Operand must be a valid number.');
+  }
+  try {
+    console.log(squareRoot(n));
+  } catch (e) {
+    console.error('Error:', e.message);
+    process.exit(2);
+  }
+  process.exit(0);
+}
+
 if (!cmd || args.length < 3) {
   invalidUsage('Not enough arguments.');
 }
@@ -76,6 +94,17 @@ switch (cmd) {
       console.error('Error:', e.message);
       process.exit(2);
     }
+    break;
+  case 'mod':
+    try {
+      console.log(modulo(a, b));
+    } catch (e) {
+      console.error('Error:', e.message);
+      process.exit(2);
+    }
+    break;
+  case 'pow':
+    console.log(power(a, b));
     break;
   default:
     invalidUsage(`Unknown command: ${cmd}`);
